@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Comentarios del Código - Explicaciones</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">📚</span> Comentarios del Código - Explicaciones</h1>
+        <p class="subtitle">Documento que responde a las preguntas e instrucciones encontradas en los comentarios del código.</p>
+        
+        <hr>
+        
+        <!-- SECTION 1 -->
+        <h2>1. Importación de estilos globales en layout.tsx</h2>
+        
+        <div class="section">
+            <p><strong>Ubicación:</strong> <span class="location">app/layout.tsx</span></p>
+            
+            <h3>Comentario original:</h3>
+            <div class="code-block">
+<code>// Hay que importar siempre los estilos que vienen ya predefinidos para que se apliquen al archivo que queramos y empiece a coger forma</code>
+            </div>
+            
+            <h3>Explicación:</h3>
+            <p>En Next.js, los estilos CSS globales deben importarse en el <strong>Layout raíz</strong> (<code>app/layout.tsx</code>), no en componentes individuales.</p>
+            
+            <h3><span class="emoji">❓</span> ¿Por qué funciona así?</h3>
+            <p>Next.js utiliza un modelo de <strong>estilos globales centralizados</strong>:</p>
+            <ul>
+                <li>Los estilos se importan en el lugar más alto de la jerarquía de componentes</li>
+                <li>El <code>layout.tsx</code> actúa como el contenedor raíz de toda la aplicación</li>
+                <li>Todos los componentes heredan estos estilos</li>
+            </ul>
+            
+            <h3><span class="emoji">⚠️</span> Consecuencia:</h3>
+            <p>Si importas CSS global en <code>page.tsx</code> o en otros componentes, causará un error de build porque Next.js no permite importar CSS global desde múltiples lugares (podría haber conflictos).</p>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 2 -->
+        <h2>2. Por qué los estilos globales solo aplican al Layout</h2>
+        
+        <div class="section">
+            <p><strong>Ubicación:</strong> <span class="location">app/ui/global.css</span></p>
+            
+            <h3>Comentario original:</h3>
+            <div class="code-block">
+<code>/* Aquí podemos añadir estilos que apliquen a toda la página. Explica por qué solo aplica al layout y por qué si lo importo en el page.tsx no se aplica el estilo */</code>
+            </div>
+            
+            <h3><span class="emoji">✅</span> ¿Por qué aplica en el Layout?</h3>
+            <p>El <code>layout.tsx</code> es el componente <strong>raíz</strong> que envuelve todo:</p>
+            <div class="code-block">
+<code>export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {/* Aquí va el children (page.tsx, otros componentes, etc.) */}
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code>
+            </div>
+            <p>Los estilos importados aquí se aplican a <strong>todo el HTML</strong> que renderiza, incluyendo los <code>children</code>.</p>
+            
+            <h3><span class="emoji">✅</span> ¿Puedo importar CSS global en page.tsx?</h3>
+            <div class="success-box">
+                <strong>Sí, es posible.</strong> A diferencia de lo que se creía anteriormente, Next.js <strong>permite</strong> importar CSS global en componentes como <code>page.tsx</code>, especialmente en versiones recientes.
+                <p>Esto funciona porque <code>page.tsx</code> sigue siendo parte del árbol de componentes que se renderiza, aunque es recomendable centralizarlo en el Layout para mejor organización.</p>
+            </div>
+            
+            <h3><span class="emoji">🎯</span> Solución: Cómo aplicar estilos específicos a page.tsx</h3>
+            <p>Si quieres estilos específicos para <code>page.tsx</code>, tienes varias opciones:</p>
+            
+            <h4>1. CSS Modules (estilos locales):</h4>
+            <div class="code-block">
+<code>import styles from "./page.module.css";
+
+export default function Page() {
+  return &lt;h1 className={styles.title}&gt;Home&lt;/h1&gt;;
+}</code>
+            </div>
+            
+            <h4>2. Tailwind CSS (con clases de utilidad):</h4>
+            <div class="code-block">
+<code>export default function Page() {
+  return &lt;h1 className="text-2xl font-bold"&gt;Home&lt;/h1&gt;;
+}</code>
+            </div>
+            
+            <h4>3. Estilos inline:</h4>
+            <div class="code-block">
+<code>export default function Page() {
+  return &lt;h1 style={{ fontSize: "2rem", fontWeight: "bold" }}&gt;Home&lt;/h1&gt;;
+}</code>
+            </div>
+            
+            <h3><span class="emoji">📊</span> Jerarquía de estilos en Next.js:</h3>
+            <div class="code-block">
+<code>app/layout.tsx
+    └── import './ui/global.css'  ✅ CSS Global (aplica a todo)
+
+    └── app/page.tsx
+         └── import './page.module.css'  ✅ CSS Local (solo para page)
+         └── className="tailwind-class"  ✅ Tailwind (solo para página)
+         └── style={{...}}               ✅ Inline (solo para página)</code>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SUMMARY 1 -->
+        <h2><span class="emoji">📌</span> Resumen - Reglas Clave</h2>
+        <table>
+            <tr>
+                <th>Regla</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td><strong>CSS Global en Layout</strong></td>
+                <td>✅ Se importa en <code>app/layout.tsx</code></td>
+            </tr>
+            <tr>
+                <td><strong>CSS Global en otros archivos</strong></td>
+                <td>✅ También es posible (aunque mejor centralizarlo en Layout)</td>
+            </tr>
+            <tr>
+                <td><strong>CSS Modules</strong></td>
+                <td>✅ Se usan en componentes específicos (<code>.module.css</code>)</td>
+            </tr>
+            <tr>
+                <td><strong>Tailwind/Inline</strong></td>
+                <td>✅ Se usan directamente en componentes</td>
+            </tr>
+        </table>
+        
+        <hr>
+        
+        <!-- SECTION 3 -->
+        <h2>3. CSS Modules: Estilos Locales para Componentes</h2>
+        
+        <div class="section">
+            <p><strong>Ubicación:</strong> <span class="location">app/page.module.css</span> y <span class="location">app/page.tsx</span></p>
+            
+            <h3>¿Qué son los CSS Modules?</h3>
+            <p>Los CSS Modules son archivos CSS que se importan como objetos JavaScript en componentes React. Cada clase CSS se convierte en una propiedad del objeto, garantizando que los estilos sean <strong>locales al componente</strong> (no globales).</p>
+            
+            <div class="info-box">
+                <strong>Ventaja principal:</strong> Los nombres de clase se "scopean" automáticamente, evitando conflictos de nombres entre componentes.
+            </div>
+            
+            <h3><span class="emoji">📝</span> Implementación práctica en la home</h3>
+            
+            <h4>1. Crear archivo page.module.css:</h4>
+            <div class="code-block">
+<code>.homeContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.headerBox {
+  display: flex;
+  height: 5rem;
+  align-items: flex-end;
+  border-radius: 0.5rem;
+  background-color: #3b82f6;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .headerBox {
+    height: 13rem;
+  }
+}
+
+.leftSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #f3f4f6;
+  padding: 2.5rem 1.5rem;
+}
+
+.welcomeText {
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.welcomeLink {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  border-radius: 0.5rem;
+  background-color: #3b82f6;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.loginButton:hover {
+  background-color: #60a5fa;
+}</code>
+            </div>
+            
+            <h4>2. Importar en page.tsx:</h4>
+            <div class="code-block">
+<code>import styles from './page.module.css';
+
+export default function Page() {
+  return (
+    &lt;main className={styles.homeContainer}&gt;
+      &lt;div className={styles.headerBox}&gt;
+        {/* Contenido */}
+      &lt;/div&gt;
+      &lt;div className={styles.contentWrapper}&gt;
+        &lt;div className={styles.leftSection}&gt;
+          &lt;p className={styles.welcomeText}&gt;
+            Bienvenido
+          &lt;/p&gt;
+          &lt;a className={styles.welcomeLink}&gt;Link&lt;/a&gt;
+          &lt;button className={styles.loginButton}&gt;
+            Log in
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/main&gt;
+  );
+}</code>
+            </div>
+            
+            <h3><span class="emoji">🔍</span> ¿Cómo funciona bajo el capó?</h3>
+            <p>Cuando compilas el proyecto, Next.js transforma el CSS Module:</p>
+            
+            <div class="code-block">
+<code>// Lo que defines en page.module.css:
+.homeContainer { ... }
+.headerBox { ... }
+
+// Se convierte en:
+// styles.homeContainer = "page_homeContainer__abc123"
+// styles.headerBox = "page_headerBox__def456"
+
+// En el HTML final:
+&lt;main className="page_homeContainer__abc123"&gt;
+&lt;/main&gt;</code>
+            </div>
+            
+            <p>Los nombres de clase se hacen <strong>únicos globalmente</strong> con un hash automático, garantizando que no haya conflictos incluso si otro componente usa <code>.homeContainer</code>.</p>
+            
+            <h3><span class="emoji">⚖️</span> CSS Modules vs Tailwind vs CSS Global</h3>
+            <table>
+                <tr>
+                    <th>Método</th>
+                    <th>Ámbito</th>
+                    <th>Caso de uso</th>
+                </tr>
+                <tr>
+                    <td><strong>CSS Global</strong></td>
+                    <td>🌍 Global (toda la app)</td>
+                    <td>Reset, variables, tipografía base</td>
+                </tr>
+                <tr>
+                    <td><strong>CSS Modules</strong></td>
+                    <td>🏠 Local (componente)</td>
+                    <td>Estilos complejos específicos</td>
+                </tr>
+                <tr>
+                    <td><strong>Tailwind CSS</strong></td>
+                    <td>✨ Clases de utilidad</td>
+                    <td>Estilos rápidos y componentes simples</td>
+                </tr>
+                <tr>
+                    <td><strong>Inline styles</strong></td>
+                    <td>🎯 Específico</td>
+                    <td>Estilos dinámicos basados en datos</td>
+                </tr>
+            </table>
+            
+            <h3><span class="emoji">✅</span> Ventajas de CSS Modules</h3>
+            <ul>
+                <li><strong>Sin conflictos de nombres:</strong> No importa si otros componentes usan las mismas clases</li>
+                <li><strong>Fácil de mantener:</strong> Los estilos viajan con el componente</li>
+                <li><strong>Seguridad de tipos:</strong> Si borras una clase, el IDE lo detecta</li>
+                <li><strong>Mejor rendimiento:</strong> Solo carga los estilos necesarios para cada página</li>
+            </ul>
+            
+            <h3><span class="emoji">❌</span> Consideraciones</h3>
+            <ul>
+                <li>No puedes usar pseudoelementos globales (necesitan CSS global)</li>
+                <li>Requiere más código que Tailwind para estilos simples</li>
+                <li>Menor reutilización de estilos entre componentes</li>
+            </ul>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 4 -->
+        <h2>4. Implementación de Google Fonts: Montserrat</h2>
+        
+        <div class="section">
+            <p><strong>Archivos modificados:</strong></p>
+            <ul>
+                <li><span class="location">app/ui/fonts.ts</span> - Configuración de fuentes</li>
+                <li><span class="location">app/layout.tsx</span> - Importación y uso</li>
+            </ul>
+            
+            <h3>Cómo se implementó:</h3>
+            
+            <h4>1. Crear app/ui/fonts.ts:</h4>
+            <div class="code-block">
+<code>import { Montserrat } from 'next/font/google';
+
+export const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-montserrat',
+});</code>
+            </div>
+            
+            <h4>2. Importar en app/layout.tsx:</h4>
+            <div class="code-block">
+<code>import { montserrat } from './ui/fonts';
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en" className={montserrat.className}&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code>
+            </div>
+            
+            <h3>¿Qué hace cada parte?</h3>
+            <ul>
+                <li><strong><code>import { Montserrat } from 'next/font/google'</code></strong> - Trae la fuente desde Google Fonts</li>
+                <li><strong><code>weight: ['400', '500', '600', '700', '800']</code></strong> - Especifica qué pesos (grosores) descargar</li>
+                <li><strong><code>subsets: ['latin']</code></strong> - Optimiza descargando solo caracteres latinos</li>
+                <li><strong><code>className={montserrat.className}</code></strong> - Aplica la fuente a todo el HTML</li>
+            </ul>
+            
+            <h3><span class="emoji">🔍</span> Autocomplete para localizar fuentes</h3>
+            <div class="info-box">
+                <strong>¿Sabías que hay autocomplete?</strong> Cuando importas desde <code>next/font/google</code>, tu editor (VS Code) tiene soporte para autocomplete. Simplemente escribe parte del nombre de la fuente deseada y el IDE te mostrará una lista de opciones disponibles en Google Fonts. Esto hace muy fácil encontrar y seleccionar la fuente perfecta sin necesidad de consultar documentación externa.
+            </div>
+            
+            <h4>Ejemplo de autocomplete:</h4>
+            <div class="code-block">
+<code>// Empieza a escribir:
+import { /* Aquí sale autocomplete */
+
+// Si escribes "Rob" verás:
+// - Roboto
+// - Roboto Condensed
+// - Roboto Flex
+// - Roboto Mono
+// - Roboto Serif
+// etc.</code>
+            </div>
+            
+            <div class="success-box">
+                La fuente se descarga automáticamente desde <strong>Google Fonts</strong> y se sirve optimizada. No necesitas archivos locales ni visitar sitios externos para buscar fuentes.
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 5 -->
+        <h2>5. Componente Image de Next.js vs HTML &lt;img&gt;</h2>
+        
+        <div class="section">
+            <p><strong>Ubicación:</strong> <span class="location">app/ui/invoices/table.tsx</span></p>
+            
+            <h3>¿Qué es el componente Image?</h3>
+            <p>Next.js proporciona un componente <code>&lt;Image&gt;</code> optimizado que reemplaza al elemento HTML <code>&lt;img&gt;</code> estándar. Es una evolución que trae múltiples mejoras de rendimiento y funcionalidad.</p>
+            
+            <h3><span class="emoji">🖼️</span> Diferencias principales</h3>
+            
+            <h4>1. HTML img normal:</h4>
+            <div class="code-block">
+<code>&lt;img 
+  src="/customers/avatar.png" 
+  alt="Customer avatar"
+  width="32"
+  height="32"
+/&gt;</code>
+            </div>
+            
+            <h4>2. Next.js Image component:</h4>
+            <div class="code-block">
+<code>import Image from 'next/image';
+
+&lt;Image
+  src="/customers/avatar.png"
+  alt="Customer avatar"
+  width={32}
+  height={32}
+/&gt;</code>
+            </div>
+            
+            <h3><span class="emoji">⚡</span> Ventajas de usar Image</h3>
+            <table>
+                <tr>
+                    <th>Característica</th>
+                    <th>&lt;img&gt; normal</th>
+                    <th>&lt;Image&gt; de Next.js</th>
+                </tr>
+                <tr>
+                    <td><strong>Optimización automática</strong></td>
+                    <td>❌ No</td>
+                    <td>✅ Sí, convierte a WebP, avif</td>
+                </tr>
+                <tr>
+                    <td><strong>Carga responsiva</strong></td>
+                    <td>❌ Carga toda la imagen</td>
+                    <td>✅ Carga diferentes tamaños según el dispositivo</td>
+                </tr>
+                <tr>
+                    <td><strong>Lazy loading automático</strong> (carga solo cuando la imagen se ve en pantalla)</td>
+                    <td>❌ Necesita JavaScript</td>
+                    <td>✅ Nativo, no necesita JS</td>
+                </tr>
+                <tr>
+                    <td><strong>Prevención de Layout Shift</strong></td>
+                    <td>❌ Puede desplazar el contenido</td>
+                    <td>✅ Requiere width/height para evitar cambios</td>
+                </tr>
+                <tr>
+                    <td><strong>Caché automático</strong></td>
+                    <td>❌ Gestión manual</td>
+                    <td>✅ Integrada en Next.js</td>
+                </tr>
+                <tr>
+                    <td><strong>Blur placeholder</strong></td>
+                    <td>❌ No disponible</td>
+                    <td>✅ Opción <code>blurDataURL</code> para efecto blur</td>
+                </tr>
+            </table>
+            
+            <h3><span class="emoji">🎯</span> Ejemplo práctico con propiedades</h3>
+            <div class="code-block">
+<code>import Image from 'next/image';
+
+export default function CustomerAvatar({ imageUrl, name }) {
+  return (
+    &lt;Image
+      src={imageUrl}
+      alt={`Avatar de ${name}`}
+      width={40}
+      height={40}
+      className="rounded-full"
+      priority={false}
+      placeholder="blur"
+      blurDataURL="data:image/jpeg;base64,..."
+    /&gt;
+  );
+}</code>
+            </div>
+            
+            <h3><span class="emoji">📋</span> Propiedades importantes de Image</h3>
+            <ul>
+                <li><strong><code>src</code></strong> - Ruta de la imagen (puede ser URL externa)</li>
+                <li><strong><code>alt</code></strong> - Texto alternativo (obligatorio para accesibilidad)</li>
+                <li><strong><code>width</code> y <code>height</code></strong> - Dimensiones obligatorias (previenen Layout Shift)</li>
+                <li><strong><code>priority</code></strong> - Si es <code>true</code>, carga la imagen antes que otras (útil para imágenes "above the fold")</li>
+                <li><strong><code>placeholder</code></strong> - Puede ser <code>"blur"</code> o <code>"empty"</code> para mostrar algo mientras carga</li>
+                <li><strong><code>quality</code></strong> - Calidad de la imagen (1-100), por defecto 75</li>
+                <li><strong><code>fill</code></strong> - Alterna a <code>true</code> si quieres que ocupe un contenedor padre</li>
+            </ul>
+            
+            <h3><span class="emoji">⚠️</span> Cuándo usar cada uno</h3>
+            <div class="info-box">
+                <strong>Usa &lt;Image&gt; de Next.js cuando:</strong>
+                <ul style="margin-top: 10px;">
+                    <li>Necesitas optimización automática</li>
+                    <li>La imagen aparece en múltiples páginas</li>
+                    <li>Quieres mejorar el Core Web Vitals (LCP, CLS)</li>
+                    <li>Trabajas con imágenes en formatos antiguos (JPG, PNG)</li>
+                </ul>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Puedes usar &lt;img&gt; cuando:</strong>
+                <ul style="margin-top: 10px;">
+                    <li>Necesitas un SVG (no necesita optimización)</li>
+                    <li>Es una imagen dinámica generada en tiempo real</li>
+                    <li>Requieres máxima flexibilidad sin restricciones de Next.js</li>
+                </ul>
+            </div>
+            
+            <div class="success-box">
+                <strong>Recomendación:</strong> Prefiere siempre <code>&lt;Image&gt;</code> en Next.js. Es mejor para el rendimiento y está optimizado automáticamente. Solo usa <code>&lt;img&gt;</code> cuando tengas una razón específica.
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 6 -->
+        <h2>6. Enrutado Basado en el Sistema de Archivos (File-based Routing)</h2>
+        
+        <div class="section">
+            <h3>¿Qué es el file-based routing?</h3>
+            <p>Next.js utiliza un sistema de enrutado automático basado en la estructura de carpetas y archivos dentro de la carpeta <code>app</code>. No necesitas configurar rutas manualmente como en otros frameworks (Express, etc.). La carpeta define la ruta URL.</p>
+            
+            <div class="info-box">
+                <strong>Regla de oro:</strong> Cada carpeta en <code>app</code> se convierte en un segmento de la ruta URL, y los archivos <code>page.tsx</code> son los que renderizan la página.
+            </div>
+            
+            <h3><span class="emoji">📁</span> Estructura de carpetas = Rutas URL</h3>
+            <div class="code-block">
+<code>app/
+├── page.tsx                    ➜ GET /
+├── about/
+│   └── page.tsx               ➜ GET /about
+├── products/
+│   └── page.tsx               ➜ GET /products
+│   └── [id]/
+│       └── page.tsx           ➜ GET /products/:id (dinámico)
+└── dashboard/
+    ├── layout.tsx             ➜ Layout específico para /dashboard y sus hijos
+    ├── page.tsx               ➜ GET /dashboard
+    ├── invoices/
+    │   ├── page.tsx           ➜ GET /dashboard/invoices
+    │   └── [id]/
+    │       └── page.tsx       ➜ GET /dashboard/invoices/:id
+    └── customers/
+        └── page.tsx           ➜ GET /dashboard/customers</code>
+            </div>
+            
+            <h3><span class="emoji">🎯</span> Ejemplo práctico: Ruta /dashboard</h3>
+            
+            <h4>1. Crear la estructura de carpetas:</h4>
+            <div class="code-block">
+<code>app/
+└── dashboard/
+    ├── layout.tsx       (opcional: layout específico del dashboard)
+    └── page.tsx         (la página que se renderiza en /dashboard)</code>
+            </div>
+            
+            <h4>2. Contenido de app/dashboard/page.tsx:</h4>
+            <div class="code-block">
+<code>import { Card } from '@/app/ui/dashboard/cards';
+import { LatestInvoices } from '@/app/ui/dashboard/latest-invoices';
+
+export default function DashboardPage() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;div className="grid grid-cols-4 gap-4"&gt;
+        &lt;Card title="Total Revenue" value="$45,231" /&gt;
+        &lt;Card title="Pending Invoices" value="12" /&gt;
+        &lt;Card title="Total Customers" value="348" /&gt;
+      &lt;/div&gt;
+      &lt;LatestInvoices /&gt;
+    &lt;/main&gt;
+  );
+}</code>
+            </div>
+            
+            <h4>3. Acceder a la página:</h4>
+            <div class="code-block">
+<code>// URL en el navegador:
+http://localhost:3000/dashboard
+
+// Desde el código (con Link de Next.js):
+import Link from 'next/link';
+
+export default function Nav() {
+  return (
+    &lt;nav&gt;
+      &lt;Link href="/dashboard"&gt;
+        Dashboard
+      &lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}</code>
+            </div>
+            
+            <h3><span class="emoji">📂</span> Convenciones especiales en Next.js</h3>
+            <table>
+                <tr>
+                    <th>Archivo</th>
+                    <th>Propósito</th>
+                    <th>Ejemplo</th>
+                </tr>
+                <tr>
+                    <td><strong>page.tsx</strong></td>
+                    <td>La página principal de la ruta</td>
+                    <td><code>app/dashboard/page.tsx</code> ➜ /dashboard</td>
+                </tr>
+                <tr>
+                    <td><strong>layout.tsx</strong></td>
+                    <td>Layout compartido para esa ruta y sus hijas</td>
+                    <td><code>app/dashboard/layout.tsx</code> envuelve /dashboard y subcarpetas</td>
+                </tr>
+                <tr>
+                    <td><strong>[id]</strong></td>
+                    <td>Segmento dinámico (parámetro de ruta)</td>
+                    <td><code>app/products/[id]/page.tsx</code> ➜ /products/123</td>
+                </tr>
+                <tr>
+                    <td><strong>[...slug]</strong></td>
+                    <td>Segmento dinámico que captura múltiples niveles</td>
+                    <td><code>app/docs/[...slug]/page.tsx</code> ➜ /docs/guides/intro</td>
+                </tr>
+                <tr>
+                    <td><strong>route.ts</strong></td>
+                    <td>Endpoint de API REST</td>
+                    <td><code>app/api/users/route.ts</code> ➜ POST /api/users</td>
+                </tr>
+            </table>
+            
+            <h3><span class="emoji">🏗️</span> Estructura típica de un proyecto</h3>
+            <div class="code-block">
+<code>app/
+├── layout.tsx                  (Layout raíz - envuelve toda la app)
+├── page.tsx                    (Página home: /)
+├── dashboard/
+│   ├── layout.tsx             (Layout del dashboard)
+│   ├── page.tsx               (/dashboard)
+│   ├── invoices/
+│   │   ├── page.tsx           (/dashboard/invoices)
+│   │   ├── [id]/
+│   │   │   └── page.tsx       (/dashboard/invoices/123)
+│   │   └── create/
+│   │       └── page.tsx       (/dashboard/invoices/create)
+│   └── customers/
+│       ├── page.tsx           (/dashboard/customers)
+│       └── [id]/
+│           └── page.tsx       (/dashboard/customers/456)
+├── login/
+│   └── page.tsx               (/login)
+├── api/
+│   ├── users/
+│   │   └── route.ts           (GET/POST /api/users)
+│   └── invoices/
+│       └── [id]/
+│           └── route.ts       (GET/PUT /api/invoices/123)
+└── ui/
+    └── (componentes compartidos, no generan rutas)</code>
+            </div>
+            
+            <h3><span class="emoji">✨</span> Ventajas del file-based routing</h3>
+            <ul>
+                <li><strong>Intuitivo:</strong> La estructura de carpetas refleja directamente las rutas</li>
+                <li><strong>Escalable:</strong> Fácil agregar nuevas páginas solo creando carpetas</li>
+                <li><strong>Sin configuración:</strong> No necesitas archivos de configuración de rutas</li>
+                <li><strong>Colocación de archivos:</strong> Puedes poner CSS modules, componentes cerca de la página</li>
+                <li><strong>Layouts anidados:</strong> Cada carpeta puede tener su propio layout</li>
+            </ul>
+            
+            <h3 class="subsection">6.1 - Subrutas: Truco para crearlas rápidamente</h3>
+            <p>Una subruta es una ruta anidada dentro de otra. Por ejemplo, <code>/dashboard/customers</code> es una subruta de <code>/dashboard</code>. Aquí viene un truco muy útil:</p>
+            
+            <div class="info-box">
+                <strong>¿Sabías este truco de VS Code?</strong> En VS Code, puedes crear un archivo con una ruta que no existe aún. El editor creará automáticamente todas las carpetas intermedias. Por ejemplo, si haces clic derecho en la carpeta <code>app/dashboard</code> y eliges "New File", puedes escribir:
+                <br><br>
+                <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 3px; color: #333;">customers/page.tsx</code>
+                <br><br>
+                VS Code creará automáticamente la carpeta <code>customers</code> y dentro el archivo <code>page.tsx</code>, ¡sin necesidad de crearlas manualmente!
+            </div>
+            
+            <h4>Ejemplo: Crear /dashboard/customers</h4>
+            <div class="code-block">
+<code>app/
+└── dashboard/
+    ├── page.tsx           (/dashboard)
+    └── customers/
+        └── page.tsx       (/dashboard/customers)  ← NUEVA SUBRUTA</code>
+            </div>
+            
+            <p className="mt-4"><strong>Cómo usar el truco:</strong></p>
+            <ol>
+                <li>Haz clic derecho en la carpeta donde quieres crear el archivo (ej: <code>app/dashboard</code>)</li>
+                <li>Selecciona "New File"</li>
+                <li>Escribe la ruta completa: <code>customers/page.tsx</code></li>
+                <li>Presiona Enter</li>
+                <li>VS Code crea automáticamente la carpeta y el archivo</li>
+            </ol>
+            
+            <div class="warning-box">
+                <strong>Funciona también para rutas más profundas:</strong>
+                <br>
+                <code style="background: #fff3e0; padding: 4px 8px; border-radius: 3px; color: #333;">customers/[id]/edit/page.tsx</code>
+                <br>
+                VS Code crea todas las carpetas intermedias automáticamente.
+            </div>
+            
+            <div class="success-box">
+                <strong>Pro tip:</strong> Usa la carpeta <code>(grupo)</code> con paréntesis para organizar rutas sin afectar la URL. Ejemplo: <code>app/(auth)/login/page.tsx</code> sigue siendo <code>/login</code> pero está organizado bajo "auth".
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SUMMARY -->
+        <h2><span class="emoji">📌</span> Resumen - Reglas Clave (Completo)</h2>
+        <table>
+            <tr>
+                <th>Regla</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td><strong>CSS Global en Layout</strong></td>
+                <td>✅ Se importa en <code>app/layout.tsx</code></td>
+            </tr>
+            <tr>
+                <td><strong>CSS Global en otros archivos</strong></td>
+                <td>✅ También es posible (aunque mejor centralizarlo en Layout)</td>
+            </tr>
+            <tr>
+                <td><strong>CSS Modules</strong></td>
+                <td>✅ Se usan en componentes específicos (<code>.module.css</code>)</td>
+            </tr>
+            <tr>
+                <td><strong>Tailwind/Inline</strong></td>
+                <td>✅ Se usan directamente en componentes</td>
+            </tr>
+            <tr>
+                <td><strong>Google Fonts</strong></td>
+                <td>✅ Se importan desde <code>next/font/google</code> con autocomplete automático</td>
+            </tr>
+            <tr>
+                <td><strong>Componente Image</strong></td>
+                <td>✅ Prefiere <code>&lt;Image&gt;</code> sobre <code>&lt;img&gt;</code> para mejor rendimiento</td>
+            </tr>
+            <tr>
+                <td><strong>File-based Routing</strong></td>
+                <td>✅ La estructura de carpetas = rutas URL automáticas</td>
+            </tr>
+            <tr>
+                <td><strong>Subrutas</strong></td>
+                <td>✅ Crea rutas anidadas escribiendo <code>carpeta/page.tsx</code> al crear archivo</td>
+            </tr>
+        </table>
+        
+        <div class="timestamp">
+            <strong>Última actualización:</strong> 5 de febrero de 2026
+        </div>
+    </hr>
+</body>
+</html>
