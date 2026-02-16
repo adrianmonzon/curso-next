@@ -713,6 +713,1255 @@ export default function Nav() {
         
         <hr>
         
+        <!-- SECTION - LAYOUTS EN RUTAS ANIDADAS -->
+        <h2><span class="emoji">🎨</span> Layouts en Rutas Anidadas</h2>
+        
+        <div class="section">
+            <h3>Concepto:</h3>
+            <p>En Next.js, cada carpeta de ruta puede tener su propio archivo <code>layout.tsx</code>. Este layout se aplicará a todos los componentes dentro de esa carpeta y sus subcarpetas.</p>
+            
+            <h3>Estructura de ejemplo:</h3>
+            <div class="code-block">
+<code>app/
+├── layout.tsx           (Layout raíz - se aplica a toda la app)
+├── page.tsx            (Página principal)
+└── dashboard/
+    ├── layout.tsx      (Layout del dashboard - se aplica solo a rutas dentro de /dashboard)
+    ├── page.tsx        (Página del dashboard)
+    ├── invoices/
+    │   ├── page.tsx    (Usa el layout de /dashboard)
+    │   └── [id]/
+    │       └── page.tsx (Usa el layout de /dashboard)
+    └── customers/
+        └── page.tsx    (Usa el layout de /dashboard)</code>
+            </div>
+            
+            <h3><span class="emoji">✅</span> ¿Cómo funciona?</h3>
+            <p>El layout de una ruta se aplica a <strong>todas las subrutas</strong> dentro de esa carpeta:</p>
+            <ul>
+                <li>El <code>layout.tsx</code> envuelve el contenido de <code>page.tsx</code></li>
+                <li>Los layouts se <strong>anidan</strong> según la estructura de carpetas</li>
+                <li>Cada layout puede tener su propio diseño, estilos y componentes</li>
+                <li>La URL no se ve afectada por los layouts</li>
+            </ul>
+            
+            <h3>Ejemplo práctico - Dashboard con sidebar:</h3>
+            <div class="code-block">
+<code>// app/dashboard/layout.tsx
+import SideNav from '@/app/ui/dashboard/sidenav';
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    &lt;div className="flex h-screen"&gt;
+      &lt;div className="w-64"&gt;
+        &lt;SideNav /&gt;
+      &lt;/div&gt;
+      &lt;div className="flex-grow"&gt;
+        {/* Aquí van todas las páginas dentro de /dashboard */}
+        {children}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</code>
+            </div>
+            
+            <h3><span class="emoji">📊</span> Jerarquía de layouts:</h3>
+            <p>Cuando accedes a <code>/dashboard/invoices</code>:</p>
+            <ol>
+                <li>Se renderiza el <code>layout.tsx</code> raíz (de <code>app/</code>)</li>
+                <li>Dentro de él, se renderiza el <code>layout.tsx</code> del dashboard (de <code>app/dashboard/</code>)</li>
+                <li>Dentro de ese, se renderiza el <code>page.tsx</code> de invoices</li>
+            </ol>
+            
+            <h3><span class="emoji">💡</span> Casos de uso:</h3>
+            <ul>
+                <li><strong>Dashboard:</strong> Sidebar + contenido principal</li>
+                <li><strong>Blog:</strong> Barra lateral con categorías + artículos</li>
+                <li><strong>Autenticación:</strong> Layout especial solo para rutas protegidas</li>
+                <li><strong>Admin Panel:</strong> Layout diferente al sitio público</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>Pro tip:</strong> Los layouts son muy útiles para mantener UI consistente en un grupo de rutas, como un sidebar que debe aparecer en todas las páginas del dashboard, pero no en otras secciones.
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 7 - NAVEGACIÓN POR LA WEB -->
+        <h2>7. Navegación por la Web</h2>
+        
+        <div class="section">
+            <h3><span class="emoji">⚠️</span> El problema actual:</h3>
+            <p>Hasta ahora, cada vez que navegamos a una nueva página (por ejemplo, haciendo clic en un enlace), <strong>la página completa se recarga</strong>. Esto sucede porque estamos usando etiquetas HTML tradicionales <code>&lt;a&gt;</code> que causan una recarga completa del servidor.</p>
+            
+            <h3>¿Qué pasa cuando navegas con un <code>&lt;a&gt;</code> tradicional?</h3>
+            <div class="code-block">
+<code>&lt;a href="/dashboard/invoices"&gt;Ver Facturas&lt;/a&gt;
+
+// El navegador:
+// 1. Envía una solicitud HTTP al servidor
+// 2. El servidor renderiza la página completa
+// 3. El navegador descarga todo (HTML, CSS, JavaScript)
+// 4. La página se recarga completamente ⟷️ Parpadeo, pérdida de scroll, etc.</code>
+            </div>
+            
+            <h3><span class="emoji">💡</span> La solución en Next.js: Componente <code>Link</code></h3>
+            <p>Next.js proporciona el componente <code>&lt;Link&gt;</code> que implementa <strong>navegación del lado del cliente (Client-side Navigation)</strong>:</p>
+            
+            <div class="code-block">
+<code>import Link from 'next/link';
+
+export default function NavLinks() {
+  return (
+    &lt;nav&gt;
+      &lt;Link href="/dashboard/invoices"&gt;
+        Ver Facturas
+      &lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}</code>
+            </div>
+            
+            <h3><span class="emoji">✅</span> Beneficios de usar <code>&lt;Link&gt;</code>:</h3>
+            <ul>
+                <li><strong>Sin recarga completa:</strong> Solo se actualiza el contenido que cambió</li>
+                <li><strong>Más rápido:</strong> No descarga CSS/JavaScript innecesarios</li>
+                <li><strong>Mejor UX:</strong> La página no parpadea, se conserva el scroll, animaciones suaves</li>
+                <li><strong>Pre-fetching:</strong> Next.js precarga las páginas automáticamente</li>
+                <li><strong>Preserva estado:</strong> Los componentes mantienen su estado durante la navegación</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>Regla importante:</strong> Siempre usa <code>&lt;Link&gt;</code> de Next.js en lugar de <code>&lt;a&gt;</code> para enlaces internos. Solo usa <code>&lt;a&gt;</code> para enlaces externos.
+            </div>
+            
+            <h3>Comparativa:</h3>
+            <table>
+                <tr>
+                    <th>Aspecto</th>
+                    <th>&lt;a&gt; tradicional</th>
+                    <th>&lt;Link&gt; de Next.js</th>
+                </tr>
+                <tr>
+                    <td><strong>Recarga de página</strong></td>
+                    <td>✅ Sí, completa</td>
+                    <td>❌ No, solo contenido</td>
+                </tr>
+                <tr>
+                    <td><strong>Velocidad</strong></td>
+                    <td>❌ Lenta</td>
+                    <td>✅ Rápida</td>
+                </tr>
+                <tr>
+                    <td><strong>Parpadeo</strong></td>
+                    <td>✅ Sí</td>
+                    <td>❌ No</td>
+                </tr>
+                <tr>
+                    <td><strong>Preserva estado</strong></td>
+                    <td>❌ Se pierde</td>
+                    <td>✅ Se mantiene</td>
+                </tr>
+                <tr>
+                    <td><strong>Pre-fetching</strong></td>
+                    <td>❌ No</td>
+                    <td>✅ Automático</td>
+                </tr>
+            </table>
+            
+            <h3><span class="emoji">🔧</span> Implementación en nuestro proyecto:</h3>
+            <p>Se ha actualizado el componente <code>NavLinks</code> (<span class="location">app/ui/dashboard/nav-links.tsx</span>) para usar <code>&lt;Link&gt;</code> de Next.js en lugar de etiquetas <code>&lt;a&gt;</code> tradicionales.</p>
+            
+            <h4>Cambio realizado:</h4>
+            <div class="code-block">
+<code>// ❌ Antes (etiquetas &lt;a&gt; - recargaban la página completa)
+&lt;a href={link.href}&gt;
+  {link.name}
+&lt;/a&gt;
+
+// ✅ Ahora (componente Link de Next.js - navegación del lado del cliente)
+import Link from 'next/link';
+
+&lt;Link href={link.href}&gt;
+  {link.name}
+&lt;/Link&gt;</code>
+            </div>
+            
+            <p><strong>Resultado:</strong> Cuando ahora haces clic en los enlaces del navegador (Home, Invoices, Customers), la página NO se recarga completamente. Solo el contenido relevante se actualiza, ofreciendo una experiencia más rápida y fluida.</p>
+            
+            <div class="warning-box">
+                <strong>Nota:</strong> El componente <code>&lt;Link&gt;</code> de Next.js es diferente al componente <code>&lt;Link&gt;</code> de React Router. Asegúrate de importarlo de <code>'next/link'</code>.
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 8 - HOOKS -->
+        <h2><span class="emoji">🎣</span> 8. Hooks</h2>
+        
+        <div class="section">
+            <h3>usePathname</h3>
+            <p><code>usePathname</code> es un Hook de Next.js que devuelve la ruta actual (pathname) de la página en la que te encuentras.</p>
+            
+            <h3><span class="emoji">❓</span> ¿Qué es el pathname?</h3>
+            <p>El pathname es la parte de la URL que viene después del dominio. Por ejemplo:</p>
+            <div class="code-block">
+<code>https://ejemplo.com/dashboard/invoices
+                                 ↑
+                           pathname
+                          /dashboard/invoices</code>
+            </div>
+            
+            <h3><span class="emoji">💡</span> Casos de uso:</h3>
+            <ul>
+                <li>Destacar el enlace activo en el navegador</li>
+                <li>Mostrar/ocultar componentes según la ruta actual</li>
+                <li>Aplicar estilos diferentes según dónde estés</li>
+            </ul>
+            
+            <h3><span class="emoji">📦</span> ¿De dónde se importa?</h3>
+            <p>Se importa desde <code>'next/navigation'</code>:</p>
+            <div class="code-block">
+<code>import { usePathname } from 'next/navigation';</code>
+            </div>
+            
+            <h3><span class="emoji">📝</span> Ejemplo práctico:</h3>
+            <div class="code-block">
+<code>import { usePathname } from 'next/navigation';
+
+export default function NavLinks() {
+  const pathname = usePathname();
+
+  return (
+    &lt;nav&gt;
+      &lt;a 
+        href="/dashboard" 
+        className={pathname === '/dashboard' ? 'active' : ''}
+      &gt;
+        Home
+      &lt;/a&gt;
+      &lt;a 
+        href="/dashboard/invoices"
+        className={pathname === '/dashboard/invoices' ? 'active' : ''}
+      &gt;
+        Invoices
+      &lt;/a&gt;
+    &lt;/nav&gt;
+  );
+}</code>
+            </div>
+            
+            <p><strong>Lo que ocurre:</strong> El link que coincida con la ruta actual recibirá la clase <code>active</code> para destacarse visualmente.</p>
+            
+            <h3><span class="emoji">⚠️</span> Error: "This React Hook only works in a Client Component"</h3>
+            <p>Cuando usas <code>usePathname</code> en un componente, probablemente recibirás este error:</p>
+            <div class="warning-box" style="background: #fff3cd; border: 1px solid #ffc107;">
+                <strong>Error:</strong> You're importing a component that needs <code>usePathname</code>. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the <code>"use client"</code> directive.
+            </div>
+            
+            <h3><span class="emoji">❓</span> ¿Por qué sucede?</h3>
+            <p>En Next.js 13+, por defecto todos los componentes son <strong>Server Components</strong> (se ejecutan en el servidor). Los Hooks como <code>usePathname</code> necesitan acceso al navegador del cliente para funcionar, por lo que solo pueden usarse en <strong>Client Components</strong> (se ejecutan en el navegador).</p>
+            
+            <h3><span class="emoji">🖥️</span> ¿Qué significa "ejecutarse en el servidor"?</h3>
+            <p>Cuando un componente se ejecuta en el servidor, significa que:</p>
+            <ul>
+                <li><strong>El código corre en el servidor:</strong> Toda la lógica del componente se ejecuta en el servidor web (en donde está alojada tu app), NO en el navegador del usuario</li>
+                <li><strong>Se convierte a HTML:</strong> El componente React se procesa/renderiza y se convierte en HTML puro</li>
+                <li><strong>Se envía al navegador:</strong> El HTML resultante se envía al navegador del usuario</li>
+                <li><strong>No interactúa con el cliente:</strong> El componente no tiene acceso a información del navegador (como la URL actual, clicks, etc.)</li>
+            </ul>
+            
+            <h3>Flujo de un Server Component:</h3>
+            <div class="code-block">
+<code>Usuario hace request
+        ↓
+Servidor ejecuta el componente React
+        ↓
+Servidor genera HTML
+        ↓
+HTML se envía al navegador
+        ↓
+Usuario ve la página renderizada</code>
+            </div>
+            
+            <h3>Flujo de un Client Component:</h3>
+            <div class="code-block">
+<code>Usuario hace request
+        ↓
+Servidor envía HTML + JavaScript
+        ↓
+Navegador descarga el JavaScript
+        ↓
+JavaScript se ejecuta EN EL NAVEGADOR
+        ↓
+El componente se renderiza en el navegador
+        ↓
+Usuario interactúa con el componente (clicks, hover, etc.)
+        ↓
+JavaScript responde a las interacciones</code>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Importante:</strong> Los Hooks como <code>usePathname()</code> necesitan información del navegador (la URL actual, por ejemplo). Un Server Component no tiene acceso a esa información porque se ejecuta en el servidor, no en el navegador. Por eso necesitas marcar el componente como Client Component con <code>'use client'</code>.
+            </div>
+            
+            <h3><span class="emoji">✅</span> La solución: "use client"</h3>
+            <p>Debes marcar el archivo con la directiva <code>"use client"</code> al inicio del archivo. Esto le indica a Next.js que este componente debe renderizarse en el cliente:</p>
+            <div class="code-block">
+<code>'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { UserGroupIcon, HomeIcon } from '@heroicons/react/24/outline';
+
+export default function NavLinks() {
+  const pathname = usePathname();
+  // ... resto del código
+}</code>
+            </div>
+            
+            <h3><span class="emoji">📌</span> Server Components vs Client Components:</h3>
+            <table>
+                <tr>
+                    <th>Característica</th>
+                    <th>Server Component</th>
+                    <th>Client Component</th>
+                </tr>
+                <tr>
+                    <td><strong>Renderiza en</strong></td>
+                    <td>Servidor</td>
+                    <td>Navegador del cliente</td>
+                </tr>
+                <tr>
+                    <td><strong>Hooks (useState, useEffect, usePathname)</strong></td>
+                    <td>❌ No permitidos</td>
+                    <td>✅ Permitidos</td>
+                </tr>
+                <tr>
+                    <td><strong>Acceso a datos privados</strong></td>
+                    <td>✅ Seguro</td>
+                    <td>❌ Expuesto al cliente</td>
+                </tr>
+                <tr>
+                    <td><strong>Tamaño del bundle</strong></td>
+                    <td>✅ Más pequeño</td>
+                    <td>❌ Más grande</td>
+                </tr>
+                <tr>
+                    <td><strong>Directiva necesaria</strong></td>
+                    <td>Ninguna (por defecto)</td>
+                    <td>'use client' al inicio</td>
+                </tr>
+            </table>
+            
+            <div class="success-box">
+                <strong>Consejo:</strong> Usa Server Components siempre que sea posible (son más eficientes). Solo usa Client Components cuando necesites Hooks o interactividad del lado del cliente.
+            </div>
+            
+            <h3><span class="emoji">🎨</span> Visualización del usePathname en acción:</h3>
+            <p>Cuando navegas por el dashboard, el elemento del menú que corresponde a la ruta actual se destaca automáticamente:</p>
+            
+            <div style="display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
+                <!-- Menú antes -->
+                <div style="flex: 1; min-width: 250px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #6b7280; text-transform: uppercase;">Menú sin usar usePathname (todos iguales):</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="padding: 10px; background: #f3f4f6; border-radius: 6px; cursor: pointer; font-size: 14px;">🏠 Home</div>
+                        <div style="padding: 10px; background: #f3f4f6; border-radius: 6px; cursor: pointer; font-size: 14px;">📄 Invoices</div>
+                        <div style="padding: 10px; background: #f3f4f6; border-radius: 6px; cursor: pointer; font-size: 14px;">👥 Customers</div>
+                    </div>
+                </div>
+                
+                <!-- Menú después -->
+                <div style="flex: 1; min-width: 250px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #16a34a; text-transform: uppercase;">✅ Menú con usePathname (destacado activo):</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="padding: 10px; background: #2563eb; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">🏠 Home</div>
+                        <div style="padding: 10px; background: #f3f4f6; border-radius: 6px; cursor: pointer; font-size: 14px;">📄 Invoices</div>
+                        <div style="padding: 10px; background: #f3f4f6; border-radius: 6px; cursor: pointer; font-size: 14px;">👥 Customers</div>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 12px; color: #666;">← El elemento activo se destaca en azul</p>
+                </div>
+            </div>
+            
+            <p><strong>¿Cómo funciona?</strong> El Hook <code>usePathname()</code> obtiene la URL actual del navegador (ej: <code>/dashboard</code>), y cuando coincide con el <code>href</code> de un link, ese link recibe estilos especiales para destacarse.</p>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 9 - CODE SPLITTING -->
+        <h2><span class="emoji">📦</span> 9. Code Splitting</h2>
+        
+        <div class="section">
+            <h3>¿Qué es Code Splitting?</h3>
+            <p>Code Splitting es una técnica en la que el código de tu aplicación se divide en múltiples archivos más pequeños (chunks), en lugar de enviar todo el código en un único archivo grande. Cada chunk se carga solo cuando es necesario.</p>
+            
+            <h3><span class="emoji">🎯</span> ¿Por qué es importante?</h3>
+            <p>Si toda tu aplicación estuviera en un único archivo JavaScript gigante:</p>
+            <ul>
+                <li><strong>Descarga lenta:</strong> El navegador tendría que descargar TODO el código, incluso las partes que no necesita</li>
+                <li><strong>Peor rendimiento:</strong> Cuanto más código, más tiempo para procesar y renderizar</li>
+                <li><strong>Mayor consumo de datos:</strong> Los usuarios descargan código innecesario</li>
+            </ul>
+            
+            <h3><span class="emoji">✅</span> Beneficios del Code Splitting:</h3>
+            <ul>
+                <li><strong>Descarga inicial más pequeña:</strong> Solo se descarga el código necesario para la página actual</li>
+                <li><strong>Carga más rápida:</strong> Menos código = carga más rápida</li>
+                <li><strong>Mejor rendimiento:</strong> El navegador puede procesar el código más rápido</li>
+                <li><strong>Menor uso de datos:</strong> Los usuarios solo descargan lo que necesitan</li>
+            </ul>
+            
+            <h3><span class="emoji">🔧</span> Cómo Next.js lo hace automáticamente:</h3>
+            <p>Next.js ya hace Code Splitting automáticamente:</p>
+            <ol>
+                <li><strong>Por ruta:</strong> Cada página (ej: <code>/dashboard</code>, <code>/dashboard/invoices</code>) es un chunk separado</li>
+                <li><strong>Por componente:</strong> Los componentes se pueden dividir en chunks más pequeños</li>
+                <li><strong>Lazy Loading:</strong> Los componentes se cargan solo cuando se necesitan</li>
+            </ol>
+            
+            <h3>Ejemplo práctico:</h3>
+            <div class="code-block">
+<code>// Sin Code Splitting (todo en un archivo):
+// bundle.js (500KB)
+  - Código de /dashboard
+  - Código de /dashboard/invoices
+  - Código de /dashboard/customers
+  - Componentes del dashboard
+  - Utilidades
+  - Librerías externas
+  
+// Con Code Splitting (varios archivos):
+// main.js (50KB) - código común de todas las páginas
+// dashboard.js (80KB) - código específico de /dashboard
+// invoices.js (90KB) - código específico de /dashboard/invoices
+// customers.js (85KB) - código específico de /dashboard/customers</code>
+            </div>
+            
+            <h3><span class="emoji">📊</span> Cómo funciona la carga:</h3>
+            <div class="code-block">
+<code>Usuario accede a /dashboard
+        ↓
+Se descarga main.js + dashboard.js
+        ↓
+Usuario navega a /dashboard/invoices
+        ↓
+Se descarga invoices.js (rest ya estaba cargado)
+        ↓
+Usuario navega a /dashboard/customers
+        ↓
+Se descarga customers.js</code>
+            </div>
+            
+            <div class="success-box">
+                <strong>Ventaja de Next.js:</strong> La navegación entre rutas usa Client-side Navigation (que vimos antes), por lo que los chunks se cargan de forma inteligente sin recargar la página completa.
+            </div>
+            
+            <h3><span class="emoji">💡</span> En nuestro proyecto:</h3>
+            <p>Cuando usamos <code>&lt;Link&gt;</code> para navegar entre <code>/dashboard</code>, <code>/dashboard/invoices</code> y <code>/dashboard/customers</code>, Next.js automáticamente:</p>
+            <ol>
+                <li>Descarga solo el código necesario para esa página</li>
+                <li>Precarga el código de las páginas relacionadas (al hacer hover en un link)</li>
+                <li>Renderiza la página sin recargar completamente</li>
+            </ol>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 10 - CREAR BASE DE DATOS -->
+        <h2><span class="emoji">🗄️</span> 10. Crear Base de Datos en Vercel</h2>
+        
+        <div class="section">
+            <h3><span class="emoji">❓</span> ¿Por qué necesitamos una base de datos?</h3>
+            <p>Una base de datos permite almacenar, organizar y recuperar datos de manera persistente. En nuestro caso, necesitamos almacenar información sobre facturas (invoices) y clientes. A diferencia de los datos ficticios que hemos usado hasta ahora, una base de datos real permite guardar información que persiste entre sesiones.</p>
+            
+            <h3><span class="emoji">🔗</span> ¿Qué es Vercel Storage?</h3>
+            <p>Vercel Storage es el servicio de almacenamiento en la nube de Vercel que permite usar bases de datos directamente integradas con tu aplicación. Ofrece varias opciones:</p>
+            <ul>
+                <li><strong>Postgres Serverless:</strong> Base de datos SQL relacional</li>
+                <li><strong>Redis:</strong> Base de datos en memoria para caching</li>
+                <li><strong>Blob Storage:</strong> Almacenamiento de archivos</li>
+            </ul>
+            
+            <h3><span class="emoji">📚</span> ¿Qué es Neon?</h3>
+            <p>Neon es un proveedor de Postgres Serverless. Ofrece una base de datos PostgreSQL completamente administrada sin necesidad de mantenimiento del servidor. Es ideal para aplicaciones de Next.js porque:</p>
+            <ul>
+                <li><strong>Escalable:</strong> Se ajusta automáticamente según la carga</li>
+                <li><strong>Seguro:</strong> Gestiona automáticamente copias de seguridad y actualizaciones</li>
+                <li><strong>Rápido:</strong> Infraestructura optimizada con baja latencia</li>
+                <li><strong>Gratuito hasta cierto límite:</strong> Perfecto para proyectos pequeños y aprendizaje</li>
+            </ul>
+            
+            <h3><span class="emoji">🚀</span> Pasos para crear la base de datos:</h3>
+            
+            <h4>1. Acceder a Vercel Storage</h4>
+            <div class="code-block">
+<code>Ir a tu proyecto en Vercel
+    ↓
+Dashboard → Tu Proyecto
+    ↓
+Menú lateral → Pestaña "Storage"
+    ↓
+Botón "+ Create Database" / "Nueva Base de Datos"</code>
+            </div>
+            
+            <h4>2. Seleccionar Postgres Serverless</h4>
+            <p>Vercel te mostrará varias opciones de bases de datos. Debes seleccionar <strong>"Postgres Serverless"</strong> que es el tipo de base de datos relacional.</p>
+            
+            <div class="info-box">
+                <strong>¿Por qué Postgres?</strong> PostgreSQL es una base de datos relacional muy poderosa y es el estándar en la industria. Es perfecto para aplicaciones que necesitan tablas relac ionadas con datos normalizados.
+            </div>
+            
+            <h4>3. Seleccionar el proveedor: Neon</h4>
+            <p>Una vez seleccionado Postgres, Vercel te pedirá que elijas un proveedor. Las opciones típicas son:</p>
+            <ul>
+                <li><strong>Neon</strong> (recomendado) - Muy popular, buena relación precio/rendimiento</li>
+                <li>PlanetScale - Otra alternativa</li>
+                <li>Otros proveedores según disponibilidad</li>
+            </ul>
+            <p>Selecciona <strong>Neon</strong> como proveedor.</p>
+            
+            <h4>4. Elegir la región: Frankfurt</h4>
+            <p>Neon te pedirá que selecciones una región geográfica donde se alojará la base de datos. Las regiones disponibles suelen incluir:</p>
+            <div class="code-block">
+<code>Estados Unidos (us-east-1, us-west-1)
+Europa (eu-west-1, eu-central-1)
+Asía (ap-southeast-1, ap-northeast-1)
+etc.</code>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Importante:</strong> Debes seleccionar <strong>Frankfurt (eu-central-1)</strong> porque es la región más cercana a tu ubicación. Una región cercana reduce la latencia (tiempo de respuesta) entre tu aplicación y la base de datos.
+            </div>
+            
+            <h3><span class="emoji">💡</span> ¿Qué es la latencia?</h3>
+            <p>La latencia es el tiempo que tarda una solicitud desde tu aplicación hasta la base de datos y la respuesta de vuelta. Si el servidor está lejos geográficamente, la latencia será mayor, haciendo que las consultas sean más lentas. Frankfurt es la región más cercana a Europa, por lo que garantiza la menor latencia para usuarios europeos.</p>
+            
+            <h4>5. Nombrar la base de datos</h4>
+            <p>En el último paso, Neon/Vercel te pedirá un nombre para tu base de datos. Este es un nombre descriptivo (no afecta a la funcionalidad).</p>
+            
+            <div class="code-block">
+<code>Nombre sugerido: create-invoices
+(También podrían ser: my-invoices, invoicing-app, dashboard-db, etc.)</code>
+            </div>
+            
+            <p>En este caso, hemos elegido <strong>create-invoices</strong> porque refleja que es una aplicación para crear y gestionar facturas.</p>
+            
+            <h4>6. Confirmar y crear</h4>
+            <p>Una vez completados los pasos anteriores, haz clic en el botón de confirmación (a menudo llamado "Create", "Crear", "Connect", etc.). Vercel procedará a:</p>
+            <ol>
+                <li>Comunicarse con Neon</li>
+                <li>Crear una nueva instancia de Postgres en la región Frankfurt</li>
+                <li>Configurar las credenciales de conexión automáticamente</li>
+                <li>Mostrar las variables de entorno necesarias</li>
+            </ol>
+            
+            <h3><span class="emoji">📋</span> Lo que obtendrás después de crear la BD:</h3>
+            <p>Una vez creada, Vercel te mostrará información importante:</p>
+            <ul>
+                <li><strong>Connection String:</strong> La cadena de conexión (contiene todas las credenciales)</li>
+                <li><strong>Host:</strong> Servidor de la BD</li>
+                <li><strong>Database:</strong> Nombre de la BD</li>
+                <li><strong>User:</strong> Usuario para conectarse</li>
+                <li><strong>Password:</strong> Contraseña</li>
+                <li><strong>Variables de entorno:</strong> .env.local automáticamente configurado</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>Vercel hace todo automáticamente:</strong> Las variables de entorno se agregan automáticamente a tu proyecto. NO tienes que copiar/pegar manualmente las credenciales, Vercel se encarga de todo.
+            </div>
+            
+            <h3><span class="emoji">🔐</span> Seguridad:</h3>
+            <ul>
+                <li><strong>Connection String:</strong> Nunca la compartas públicamente</li>
+                <li><strong>Variables de entorno:</strong> Se guardan en .env.local (NO se versionan en Git)</li>
+                <li><strong>Password:</strong> Neon genera una contraseña fuerte automáticamente</li>
+                <li><strong>Conexiones SSL:</strong> Las conexiones a la BD van cifradas</li>
+            </ul>
+            
+            <h3><span class="emoji">🎯</span> Próximos pasos después de crear la BD:</h3>
+            <p>Una vez creada la base de datos, necesitarás:</p>
+            <ol>
+                <li><strong>Instalar un cliente de Postgres:</strong> Para conectarte desde tu aplicación (como <code>pg</code> o <code>prisma</code>)</li>
+                <li><strong>Crear tablas:</strong> Definir la estructura (facturas, clientes, etc.)</li>
+                <li><strong>Crear un script de seed:</strong> Llenar la BD con datos de prueba</li>
+                <li><strong>Crear funciones para consultar:</strong> Funciones en tu aplicación para obtener/guardar datos</li>
+            </ol>
+            
+            <div class="info-box">
+                <strong>En los siguientes temas veremos:</strong> Cómo configurar el cliente de Postgres, crear tablas, seed de datos y construir funciones para interactuar con la base de datos desde tu aplicación Next.js.
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 10.1 - COPIAR VARIABLES DE ENTORNO -->
+        <h2><span class="emoji">🔑</span> 10.1 Copiar Variables de Entorno desde Vercel</h2>
+        
+        <div class="section">
+            <h3>¿Qué son las variables de entorno?</h3>
+            <p>Las variables de entorno son configuraciones sensibles (como contraseñas, URLs de servidor, claves API) que se almacenan fuera del código. No deben estar en el repositorio Git por razones de seguridad.</p>
+            
+            <h3><span class="emoji">📁</span> .env vs .env.local - ¿Cuál es la diferencia?</h3>
+            <p>Next.js utiliza un sistema de archivos de configuración con prioridad. Es <strong>muy importante</strong> entender la diferencia:</p>
+            
+            <table>
+                <tr>
+                    <th>Archivo</th>
+                    <th>.env</th>
+                    <th>.env.local</th>
+                </tr>
+                <tr>
+                    <td><strong>Propósito</strong></td>
+                    <td>Variables por defecto/ejemplo</td>
+                    <td>Variables locales (reales/secretas)</td>
+                </tr>
+                <tr>
+                    <td><strong>Se versionan en Git</strong></td>
+                    <td>❌ No (está en .gitignore)</td>
+                    <td>❌ No (está en .gitignore)</td>
+                </tr>
+                <tr>
+                    <td><strong>Visiblidad</strong></td>
+                    <td>👥 Pensado como template/ejemplo</td>
+                    <td>🔒 Privado (solo tú lo ves localmente)</td>
+                </tr>
+                <tr>
+                    <td><strong>Valores típicos</strong></td>
+                    <td>Placeholders/ejemplos ficticios</td>
+                    <td>Credenciales reales de tu BD</td>
+                </tr>
+                <tr>
+                    <td><strong>Uso común</strong></td>
+                    <td>Documentación/referencia local</td>
+                    <td>Tus credenciales auténticas</td>
+                </tr>
+            </table>
+            
+            <div class="info-box">
+                <strong>Nota importante:</strong> Ambos archivos (.env y .env.local) están listados en <code>.gitignore</code>, así que ninguno se versiona en Git por seguridad. Pega las variables de Vercel en el archivo que uses (<code>.env</code> o <code>.env.local</code>), da igual.
+            </div>
+            
+            <h3><span class="emoji">📖</span> Pasos para copiar las variables desde Vercel:</h3>
+            
+            <h4>1. Ir a la sección Storage en Vercel</h4>
+            <div class="code-block">
+<code>Tu proyecto en Vercel
+    ↓
+Pestaña "Storage"
+    ↓
+Selecciona tu base de datos (create-invoices)
+    ↓
+Se abrirá la página de detalles de la BD</code>
+            </div>
+            
+            <h4>2. Buscar el botón ".env.local"</h4>
+            <p>En la página de detalles de la BD, verás un botón o pestaña llamada <strong>".env.local"</strong> o <strong>"Variables"</strong>. Este botón contiene todas las variables de entorno necesarias para conectar a la base de datos.</p>
+            
+            <h4>3. Copiar el snippet completo</h4>
+            <p>Haz clic en el botón (generalmente dice "Copy" o tiene un icono de copiar). Vercel copiará al portapapeles un snippet con TODAS las variables necesarias:</p>
+            
+            <div class="code-block">
+<code>DATABASE_URL=postgresql://[usuario]:[contraseña]@[host]-pooler.[región].[proveedor].neon.tech/[db]?sslmode=require
+
+DATABASE_URL_UNPOOLED=postgresql://[usuario]:[contraseña]@[host].[región].[proveedor].neon.tech/[db]?sslmode=require
+
+PGHOST=[host]-pooler.[región].[proveedor].neon.tech
+PGHOST_UNPOOLED=[host].[región].[proveedor].neon.tech
+PGUSER=[usuario]
+PGDATABASE=[db]
+PGPASSWORD=[contraseña]
+
+POSTGRES_URL=postgresql://[usuario]:[contraseña]@[host]-pooler.[región].[proveedor].neon.tech/[db]?sslmode=require
+POSTGRES_URL_NON_POOLING=postgresql://[usuario]:[contraseña]@[host].[región].[proveedor].neon.tech/[db]?sslmode=require
+POSTGRES_USER=[usuario]
+POSTGRES_HOST=[host]-pooler.[región].[proveedor].neon.tech
+POSTGRES_PASSWORD=[contraseña]
+POSTGRES_DATABASE=[db]
+POSTGRES_URL_NO_SSL=postgresql://[usuario]:[contraseña]@[host]-pooler.[región].[proveedor].neon.tech/[db]
+POSTGRES_PRISMA_URL=postgresql://[usuario]:[contraseña]@[host]-pooler.[región].[proveedor].neon.tech/[db]?connect_timeout=15&sslmode=require</code>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ IMPORTANTE:</strong> Los valores que ves arriba son genéricos/placeholders. El snippet real de Vercel contendrá tus credenciales auténticas (usuario, contraseña, host, etc.). <strong>Nunca compartas estos valores reales públicamente.</strong>
+            </div>
+            
+            <h3><span class="emoji">📝</span> ¿Qué significan estas variables?</h3>
+            <table>
+                <tr>
+                    <th>Variable</th>
+                    <th>Significado</th>
+                    <th>Cuándo usarla</th>
+                </tr>
+                <tr>
+                    <td><strong>DATABASE_URL</strong></td>
+                    <td>Cadena de conexión completa con pooling</td>
+                    <td>✅ Recomendado para aplicaciones web</td>
+                </tr>
+                <tr>
+                    <td><strong>DATABASE_URL_UNPOOLED</strong></td>
+                    <td>Cadena de conexión SIN pooling</td>
+                    <td>Para conexiones de larga duración</td>
+                </tr>
+                <tr>
+                    <td><strong>POSTGRES_URL / POSTGRES_PRISMA_URL</strong></td>
+                    <td>Alternativas de conexión</td>
+                    <td>Si usas Prisma ORM</td>
+                </tr>
+                <tr>
+                    <td><strong>PGHOST, PGUSER, PGPASSWORD, PGDATABASE</strong></td>
+                    <td>Componentes individuales de la conexión</td>
+                    <td>Si necesitas construir tu propia cadena</td>
+                </tr>
+            </table>
+            
+            <h3><span class="emoji">💡</span> ¿Qué es "pooling"?</h3>
+            <p>Pooling es una técnica para reutilizar conexiones a la base de datos en lugar de crear una nueva para cada solicitud. Es más eficiente y es lo que recomendamos usar (DATABASE_URL con pooler).</p>
+            
+            <h4>4. Pegar en tu archivo .env.local</h4>
+            <p>Abre el archivo <code>.env.local</code> en tu proyecto (en la raíz del proyecto Next.js) y pega el contenido que copiaste:</p>
+            
+            <div class="code-block">
+<code>📁 Tu proyecto
+  ├── .env.local              ← Pega aquí las variables
+  ├── .gitignore
+  ├── app/
+  ├── package.json
+  └── tsconfig.json</code>
+            </div>
+            
+            <h4>Instrucciones paso a paso:</h4>
+            <ol>
+                <li>En VS Code, abre el archivo <code>.env.local</code> en la raíz de tu proyecto</li>
+                <li>Coloca el cursor al final del archivo</li>
+                <li>Pega (Ctrl+V o Cmd+V) el contenido que copiaste de Vercel</li>
+                <li>Guarda el archivo (Ctrl+S o Cmd+S)</li>
+            </ol>
+            
+            <h3><span class="emoji">⚡</span> Alternativa: Descargar variables automáticamente con Vercel CLI</h3>
+            <p>En lugar de copiar/pegar manualmente, puedes usar los comandos de Vercel CLI para descargar las variables automáticamente:</p>
+            
+            <h4>Paso 1: Instalar Vercel CLI (si no la tienes)</h4>
+            <div class="code-block">
+<code>npm install -g vercel</code>
+            </div>
+            
+            <h4>Paso 2: Vincular tu proyecto local con Vercel</h4>
+            <div class="code-block">
+<code>vercel link</code>
+            </div>
+            <p>Este comando vincula tu proyecto local con el proyecto en Vercel. Si es la primera vez, te pedirá que inicies sesión y selecciones qué proyecto vincular.</p>
+            
+            <h4>Paso 3: Descargar las variables de entorno</h4>
+            <div class="code-block">
+<code>vercel env pull</code>
+            </div>
+            <p>Este comando descarga TODAS las variables de entorno de Vercel (incluyendo las de la BD) y crea automáticamente un archivo <code>.env.local</code> en tu proyecto.</p>
+            
+            <div class="success-box">
+                <strong>¡Listo!</strong> Vercel habrá creado el <code>.env.local</code> con todas las variables. No necesitas copiar/pegar nada manualmente.
+            </div>
+            
+            <div class="info-box">
+                <strong>Ventaja:</strong> Si cambias las variables en Vercel Dashboard, solo tienes que volver a ejecutar <code>vercel env pull</code> para sincronizar localmente.
+            </div>
+            
+            <h3><span class="emoji">⚠️</span> Si el archivo .env.local no existe:</h3>
+            <p>Si no existe el archivo <code>.env.local</code>, debes crearlo:</p>
+            <ol>
+                <li>Haz clic derecho en la carpeta raíz del proyecto en VS Code</li>
+                <li>Selecciona "New File"</li>
+                <li>Escribe <code>.env.local</code></li>
+                <li>Presiona Enter</li>
+                <li>Pega el contenido de Vercel</li>
+            </ol>
+            
+            <h3><span class="emoji">📦</span> Instalar dependencia para conectar a la BD:</h3>
+            <p>Para conectar a la base de datos desde tu aplicación, necesitas instalar una dependencia. Tienes dos opciones:</p>
+            
+            <h4>Opción 1: @neondatabase/serverless (recomendado actualmente)</h4>
+            <div class="code-block">
+<code>npm install @neondatabase/serverless</code>
+            </div>
+            <p>Esta es la opción actual recomendada por Neon. Instálala si Vercel Marketplace te ofrece esta opción en el quickstart.</p>
+            
+            <h4>Opción 2: @vercel/postgres (deprecado, pero sigue funcionando)</h4>
+            <div class="code-block">
+<code>npm install @vercel/postgres</code>
+            </div>
+            <p>Esta es la opción del curso (de hace unos años). Está marcada como deprecada, pero sigue siendo funcional. Si el curso la usa, puedes instalarla sin problema.</p>
+            
+            <div class="info-box">
+                <strong>¿Cuál elegir?</strong> Si tu curso enseña <code>@vercel/postgres</code>, úsalo. Si prefieres la opción más actual, usa <code>@neondatabase/serverless</code>. Ambas funcionan con Neon a través de Vercel.
+            </div>
+            
+            <h3><span class="emoji">✅</span> Verificar que funciona:</h3>
+            <p>Para verificar que las variables de entorno se cargaron correctamente, puedes crear un pequeño script en la carpeta <code>app/</code>:</p>
+            
+            <div class="code-block">
+<code>// app/test-env.ts
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✅ Conectado' : '❌ No conectado');
+
+// Si ves "✅ Conectado" en la consola, significa que Next.js cargó correctamente las variables</code>
+            </div>
+            
+            <h3><span class="emoji">🔒</span> Consideraciones de seguridad:</h3>
+            <ul>
+                <li><strong>Nunca compartas tu .env.local:</strong> Contiene tus credenciales reales</li>
+                <li><strong>Añade .env.local a .gitignore:</strong> Asegúrate de que NO se versioné en Git</li>
+                <li><strong>Las variables están disponibles en Node.js:</strong> En el servidor (SSR, API routes, server components)</li>
+                <li><strong>Las variables NO están en el cliente:</strong> El navegador no tiene acceso a <code>process.env</code> (a menos que uses NEXT_PUBLIC_*)</li>
+                <li><strong>Si cambias las credenciales:</strong> Debes actualizar .env.local localmente y también en Vercel</li>
+            </ul>
+            
+            <div class="success-box">
+                <strong>Próximo paso:</strong> Una vez tengas las variables de entorno configuradas, podrás conectar a la base de datos desde tu aplicación Next.js usando librerías como <code>pg</code> (cliente de Postgres) o <code>Prisma</code> (ORM).
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- SECTION 10.2 - COMANDO SEED -->
+        <h2><span class="emoji">🌱</span> 10.2 Ejecutar el Script Seed para Llenar la BD</h2>
+        
+        <div class="section">
+            <h3>¿Qué es un seed?</h3>
+            <p>Un seed es un script que llena tu base de datos con datos iniciales de prueba. Es útil para tener datos listos mientras desarrollas tu aplicación sin tener que crear todo manualmente.</p>
+            
+            <h3><span class="emoji">🏗️</span> Cómo funciona el seed en este proyecto</h3>
+            <p>El seed está implementado como un <strong>endpoint HTTP</strong> (ruta de Next.js), no como un script CLI. Esto significa que se ejecuta visitando una URL en tu navegador, no mediante un comando en terminal.</p>
+            
+            <div class="info-box">
+                <strong>Diferencia importante:</strong> En algunos cursos antiguos, el seed era un archivo ejecutable independiente (<code>.scripts/seed.js</code>). En este proyecto (Next.js moderno), el seed es una <strong>API route</strong> ubicada en <code>app/seed/route.ts</code> con un manejador HTTP GET().
+            </div>
+            
+            <h3><span class="emoji">📂</span> Ubicación del seed</h3>
+            <p>El archivo que contiene el seed está en:</p>
+            <div class="code-block">
+<code>📁 Tu proyecto
+  ├── app/
+  │   ├── seed/
+  │   │   └── route.ts          ← Aquí está el seed
+  │   ├── layout.tsx
+  │   └── page.tsx
+  └── ...</code>
+            </div>
+            
+            <h3><span class="emoji">🔍</span> Estructura del archivo route.ts (con explicación)</h3>
+            <div class="code-block">
+<code>// 1️⃣ IMPORTACIONES
+import postgres from 'postgres';
+
+// 2️⃣ CONEXIÓN A LA BD
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+// ↳ Se conecta a Neon usando la URL del .env
+
+// 3️⃣ FUNCIONES INDIVIDUALES (una para cada tabla)
+async function seedUsers() {
+  // Crea tabla users e inserta datos
+}
+
+async function seedInvoices() {
+  // Crea tabla invoices e inserta datos
+}
+
+async function seedCustomers() {
+  // Crea tabla customers e inserta datos
+}
+
+async function seedRevenue() {
+  // Crea tabla revenue e inserta datos
+}
+
+// 4️⃣ MANEJADOR HTTP GET (el que se ejecuta cuando visitas /seed)
+export async function GET() {
+  try {
+    // Crear extensión uuid-ossp una sola vez
+    await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+    
+    // Ejecutar todos los seeds en orden
+    const result = await sql.begin((sql) => [
+      seedUsers(),
+      seedCustomers(),
+      seedInvoices(),
+      seedRevenue(),
+    ]);
+
+    // Retornar respuesta exitosa
+    return Response.json({ message: 'Database seeded successfully' });
+  } catch (error) {
+    // Si hay error, retorna el error en JSON
+    return Response.json({ error }, { status: 500 });
+  }
+}</code>
+            </div>
+            
+            <h3><span class="emoji">📌</span> ¿Qué hace cada parte?</h3>
+            <table>
+                <tr>
+                    <th>Sección</th>
+                    <th>Propósito</th>
+                </tr>
+                <tr>
+                    <td><strong>Importaciones</strong></td>
+                    <td>Trae el cliente de Postgres para conectar a la BD</td>
+                </tr>
+                <tr>
+                    <td><strong>Conexión (sql)</strong></td>
+                    <td>Establece la conexión a Neon usando POSTGRES_URL del .env</td>
+                </tr>
+                <tr>
+                    <td><strong>Funciones seed*</strong></td>
+                    <td>Cada una crea su tabla y llena con datos de prueba</td>
+                </tr>
+                <tr>
+                    <td><strong>GET()</strong></td>
+                    <td>Es el punto de entrada HTTP. Se ejecuta cuando visitas /seed</td>
+                </tr>
+                <tr>
+                    <td><strong>CREATE EXTENSION</strong></td>
+                    <td>Crea la extensión uuid-ossp (para generar UUIDs únicos)</td>
+                </tr>
+                <tr>
+                    <td><strong>sql.begin()</strong></td>
+                    <td>Ejecuta todas las funciones en una transacción (todo o nada)</td>
+                </tr>
+                <tr>
+                    <td><strong>Response.json()</strong></td>
+                    <td>Retorna el resultado como JSON al navegador</td>
+                </tr>
+            </table>
+            
+            <h3><span class="emoji">🚀</span> Pasos para ejecutar el seed</h3>
+            
+            <h4>Paso 1: Inicia el servidor de desarrollo</h4>
+            <div class="code-block">
+<code>npm run dev</code>
+            </div>
+            <p>Esto inicia Next.js en modo desarrollo (normalmente en <code>http://localhost:3000</code>).</p>
+            
+            <h4>Paso 2: Abre el navegador y visita el endpoint del seed</h4>
+            <div class="code-block">
+<code>http://localhost:3000/seed</code>
+            </div>
+            <p>Simplemente escribe esto en la barra de direcciones de tu navegador. El servidor Next.js ruteará esta solicitud al manejador GET() en <code>route.ts</code>.</p>
+            
+            <h4>Paso 3: Verifica la respuesta</h4>
+            <p>Si todo funciona correctamente, verás en el navegador:</p>
+            <div class="code-block">
+<code>{"message":"Database seeded successfully"}</code>
+            </div>
+            
+            <div class="success-box">
+                <strong>¡Listo!</strong> Tu base de datos está ahora llena de datos de prueba.
+            </div>
+            
+            <h3><span class="emoji">⚠️</span> Posible error: "uuid-ossp already exists"</h3>
+            <p>Si ves un error como este:</p>
+            <div class="code-block">
+<code>{"error": { "code": "23505", "detail": "Key (extname)=(uuid-ossp) already exists" }}</code>
+            </div>
+            
+            <p><strong>Causa:</strong> La extensión <code>uuid-ossp</code> se está intentando crear múltiples veces (una en cada función de seed).</p>
+            
+            <p><strong>Solución:</strong> La extensión debe crearse <strong>solo una vez</strong> en el manejador GET(), no en cada función individual. El código correcto (que ya está en tu proyecto) es:</p>
+            <div class="code-block">
+<code>export async function GET() {
+  try {
+    <mark style="background-color: #c8e6c9; padding: 0 4px;">await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;  // ← Una sola vez aquí</mark>
+    
+    const result = await sql.begin((sql) => [
+      seedUsers(),      // No crea la extensión
+      seedInvoices(),   // No crea la extensión
+      seedCustomers(),  // No crea la extensión
+      seedRevenue(),    // No crea la extensión
+    ]);
+    
+    return Response.json({ message: 'Database seeded successfully' });
+  } catch (error) {
+    return Response.json({ error }, { status: 500 });
+  }
+}</code>
+            </div>
+            
+            <p>Si ya ejecutaste el seed una vez y ves este error al intentar ejecutarlo de nuevo, es porque la extensión ya existe en la BD (esto es normal). Puedes ignorar este error o simplemente no ejecutar el seed otra vez.</p>
+            
+            <h3><span class="emoji">📊</span> ¿Qué tablas se crearon?</h3>
+            <p>Cuando ejecutaste el seed visitando <code>http://localhost:3000/seed</code>, se crearon automáticamente <strong>4 tablas</strong> en tu BD de Neon. Puedes verlas en el panel de Neon:</p>
+            
+            <h4>Cómo verlas en Neon:</h4>
+            <ol>
+                <li>Ve a <strong>Vercel Dashboard</strong> → tu proyecto</li>
+                <li>Haz clic en <strong>Storage</strong> → selecciona tu BD <code>create-invoices</code></li>
+                <li>Haz clic en la pestaña <strong>"Tables"</strong></li>
+                <li>Deberías ver: <code>users</code>, <code>customers</code>, <code>invoices</code>, <code>revenue</code></li>
+            </ol>
+            
+            <h3><span class="emoji">📦</span> ¿De dónde vienen los datos?</h3>
+            <p>Los datos de seed vienen de un archivo compilado en tu proyecto:</p>
+            <div class="code-block">
+<code>app/lib/placeholder-data.ts
+    ├── const users = [...]          ← 1 usuario
+    ├── const customers = [...]      ← 6 clientes
+    ├── const invoices = [...]       ← 8 facturas
+    └── const revenue = [...]        ← 12 meses de ingresos</code>
+            </div>
+            
+            <p>Este archivo contiene arrays de datos en JavaScript. El seed (<code>app/seed/route.ts</code>) lee estos datos y los inserta en la BD:</p>
+            
+            <div class="code-block">
+<code>// app/seed/route.ts
+
+import { users, customers, invoices, revenue } from '../lib/placeholder-data';
+
+async function seedUsers() {
+  // Itera sobre el array 'users' e inserta cada uno en la BD
+  users.map(user => {
+    sql`INSERT INTO users (...) VALUES (...)`
+  })
+}
+
+async function seedCustomers() {
+  // Itera sobre el array 'customers' e inserta cada uno en la BD
+  customers.map(customer => {
+    sql`INSERT INTO customers (...) VALUES (...)`
+  })
+}</code>
+            </div>
+            
+            <h3><span class="emoji">🗂️</span> Estructura de las 4 tablas</h3>
+            
+            <h4>1️⃣ Tabla: <strong>users</strong></h4>
+            <p>Almacena información de usuarios del sistema (credenciales de login).</p>
+            <table>
+                <tr>
+                    <th>Columna</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>UUID (PK)</td>
+                    <td>Identificador único del usuario (generado automáticamente)</td>
+                </tr>
+                <tr>
+                    <td><code>name</code></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Nombre del usuario</td>
+                </tr>
+                <tr>
+                    <td><code>email</code></td>
+                    <td>TEXT (UNIQUE)</td>
+                    <td>Email único del usuario (no puede repetirse)</td>
+                </tr>
+                <tr>
+                    <td><code>password</code></td>
+                    <td>TEXT</td>
+                    <td>Contraseña encriptada con bcrypt</td>
+                </tr>
+            </table>
+            <p><strong>Datos en la tabla:</strong> 1 usuario de ejemplo</p>
+            
+            <h4>2️⃣ Tabla: <strong>customers</strong></h4>
+            <p>Almacena la información de los clientes/empresas.</p>
+            <table>
+                <tr>
+                    <th>Columna</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>UUID (PK)</td>
+                    <td>Identificador único del cliente</td>
+                </tr>
+                <tr>
+                    <td><code>name</code></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Nombre del cliente/empresa</td>
+                </tr>
+                <tr>
+                    <td><code>email</code></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Email del cliente</td>
+                </tr>
+                <tr>
+                    <td><code>image_url</code></td>
+                    <td>VARCHAR(255)</td>
+                    <td>URL del avatar/logo del cliente</td>
+                </tr>
+            </table>
+            <p><strong>Datos en la tabla:</strong> 6 clientes de ejemplo (Evil Rabbit, Delba de Oliveira, Lee Robinson, Michael Novotny, Amy Burns, Balazs Orban)</p>
+            
+            <h4>3️⃣ Tabla: <strong>invoices</strong></h4>
+            <p>Almacena las facturas. Cada factura está <strong>vinculada a un cliente</strong> mediante <code>customer_id</code>.</p>
+            <table>
+                <tr>
+                    <th>Columna</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+                <tr>
+                    <td><code>id</code></td>
+                    <td>UUID (PK)</td>
+                    <td>Identificador único de la factura</td>
+                </tr>
+                <tr>
+                    <td><code>customer_id</code></td>
+                    <td>UUID (FK)</td>
+                    <td><strong>Clave foránea:</strong> Vincula la factura a un cliente en la tabla <code>customers</code></td>
+                </tr>
+                <tr>
+                    <td><code>amount</code></td>
+                    <td>INT</td>
+                    <td>Cantidad en centavos (ej: 1579500 = $15.795)</td>
+                </tr>
+                <tr>
+                    <td><code>status</code></td>
+                    <td>VARCHAR(255)</td>
+                    <td>Estado de la factura: <code>pending</code>, <code>paid</code>, o <code>overdue</code></td>
+                </tr>
+                <tr>
+                    <td><code>date</code></td>
+                    <td>DATE</td>
+                    <td>Fecha de la factura (formato YYYY-MM-DD)</td>
+                </tr>
+            </table>
+            <p><strong>Datos en la tabla:</strong> 8 facturas de ejemplo, vinculadas a diferentes clientes</p>
+            
+            <h4>4️⃣ Tabla: <strong>revenue</strong></h4>
+            <p>Almacena ingresos mensuales agregados (usada para gráficos de dashboard).</p>
+            <table>
+                <tr>
+                    <th>Columna</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+                <tr>
+                    <td><code>month</code></td>
+                    <td>VARCHAR(4) (PK)</td>
+                    <td>Mes en formato YYYY-MM (ej: "2023-01")</td>
+                </tr>
+                <tr>
+                    <td><code>revenue</code></td>
+                    <td>INT</td>
+                    <td>Ingresos totales para ese mes en centavos</td>
+                </tr>
+            </table>
+            <p><strong>Datos en la tabla:</strong> 12 meses de datos de ingresos de ejemplo</p>
+            
+            <h3><span class="emoji">🔗</span> Relaciones entre tablas</h3>
+            <p>Las tablas están relacionadas de la siguiente manera:</p>
+            <div class="code-block">
+<code>customers
+    ↓ (1 a muchos)
+invoices    (cada factura pertenece a UN cliente)
+    ↓
+    customer_id (clave foránea que apunta a customers.id)
+
+Ejemplo:
+Customer "Evil Rabbit" (id = d6e15727...)
+    └─→ Invoice 1 (customer_id = d6e15727...)
+    └─→ Invoice 2 (customer_id = d6e15727...)
+    └─→ Invoice 3 (customer_id = d6e15727...)</code>
+            </div>
+            
+            <h3><span class="emoji">⏳</span> Próximo paso: Conectar componentes con el fetching de datos</h3>
+            <p>En este momento, la base de datos está llena de datos y las funciones de query existen en <code>app/lib/data.ts</code> (como <code>fetchLatestInvoices()</code>, <code>fetchCardData()</code>, etc).</p>
+            
+            <p><strong>Sin embargo, los componentes del dashboard aún NO usan estas funciones.</strong> Siguen mostrando datos hardcodeados en lugar de datos reales de la BD.</p>
+            
+            <div class="warning-box" style="background-color: #fff3cd; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                <strong>📝 Tarea pendiente (para la próxima sesión):</strong>
+                <p style="margin-top: 10px;">Actualizar los componentes del dashboard para que sean <strong>Server Components</strong> y usen las funciones de query en lugar de datos hardcodeados:</p>
+                <ul style="margin-top: 10px;">
+                    <li><code>app/dashboard/page.tsx</code> - Usar <code>fetchCardData()</code>, <code>fetchLatestInvoices()</code>, etc.</li>
+                    <li><code>app/dashboard/invoices/page.tsx</code> - Usar <code>fetchFilteredInvoices()</code></li>
+                    <li><code>app/dashboard/customers/page.tsx</code> - Usar <code>fetchFilteredCustomers()</code></li>
+                    <li>Otros componentes que necesiten datos de la BD</li>
+                </ul>
+            </div>
+            
+            <p>Cuando hagas esto, los datos reales de Neon se mostrarán automáticamente en lugar de los datos ficticios.</p>
+            
+            <h3><span class="emoji">✅</span> Cómo verificar que el seed funcionó</h3>
+            
+            <h4>Opción 1: Ver datos en tu aplicación</h4>
+            <p>Navega a <code>http://localhost:3000/dashboard</code> y verifica que ves:</p>
+            <ul>
+                <li>Gráfico de ingresos (revenue chart)</li>
+                <li>Cards con información de facturación</li>
+                <li>Lista de facturas recientes</li>
+            </ul>
+            
+            <h4>Opción 2: Consultar la BD directamente en Neon</h4>
+            <p>Ve a tu consola de Neon en Vercel Storage y ejecuta SQL para verificar:</p>
+            <div class="code-block">
+<code>-- En la consola de Neon
+SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM customers;
+SELECT COUNT(*) FROM invoices;
+SELECT COUNT(*) FROM revenue;</code>
+            </div>
+            <p>Deberías ver números > 0 si el seed funcionó.</p>
+            
+            <h4>Opción 3: Usar una herramienta como DBeaver o pgAdmin</h4>
+            <p>Conecta a tu BD usando las credenciales del archivo <code>.env</code> y verifica las tablas y datos directamente.</p>
+            
+            <h3><span class="emoji">📋</span> ¿Por qué no hay comando "npm run seed"?</h3>
+            <p>Algunos desarrolladores esperan un comando <code>npm run seed</code> en la terminal (como los bancos de datos tradicionales). Sin embargo, <strong>este proyecto NO tiene ese comando</strong>, y es intencional.</p>
+            
+            <p><strong>Razón:</strong> El seed está implementado como un <strong>endpoint HTTP</strong> (ruta de Next.js), no como un script ejecutable independiente.</p>
+            
+            <div class="info-box">
+                ¿Por qué? Porque:
+                <ul style="margin-top: 10px;">
+                    <li>El archivo <code>app/seed/route.ts</code> es una ruta de Next.js que necesita el servidor corriendo</li>
+                    <li>Las funciones de seed importan desde <code>placeholder-data.ts</code>, que es parte del proyecto Next.js</li>
+                    <li>No se puede ejecutar como un script CLI tradicional (aunque lo teníamos configurado, no funcionaba correctamente)</li>
+                </ul>
+            </div>
+            
+            <p><strong>La forma correcta es siempre:</strong> Visitar <code>http://localhost:3000/seed</code> en el navegador (con el servidor corriendo).</p>
+            
+            <p>Si alguna vez necesites un seed CLI tradicional, tendrías que crear un archivo separado en <code>.scripts/seed.ts</code> con acceso directo a la BD, pero la forma actual (por HTTP) es la recomendada en Next.js moderno porque garantiza que todo funcione correctamente.</p>
+            
+            <h3><span class="emoji">🎯</span> Resumen del proceso</h3>
+            <table>
+                <tr>
+                    <th>Paso</th>
+                    <th>Acción</th>
+                    <th>Comando/URL</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Inicia servidor de desarrollo</td>
+                    <td><code>npm run dev</code></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Abre navegador en endpoint del seed</td>
+                    <td><code>http://localhost:3000/seed</code></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Verifica respuesta JSON de éxito</td>
+                    <td><code>{"message":"Database seeded successfully"}</code></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>(Opcional) Verifica datos en dashboard</td>
+                    <td><code>http://localhost:3000/dashboard</code></td>
+                </tr>
+        </div>
+        
+        <hr>
+        
         <!-- SUMMARY -->
         <h2><span class="emoji">📌</span> Resumen - Reglas Clave (Completo)</h2>
         <table>
@@ -752,10 +2001,18 @@ export default function Nav() {
                 <td><strong>Subrutas</strong></td>
                 <td>✅ Crea rutas anidadas escribiendo <code>carpeta/page.tsx</code> al crear archivo</td>
             </tr>
+            <tr>
+                <td><strong>Layouts anidados</strong></td>
+                <td>✅ Cada carpeta puede tener su propio <code>layout.tsx</code> que se aplica a sus subrutas</td>
+            </tr>
+            <tr>
+                <td><strong>Navegación interna</strong></td>
+                <td>✅ Usa <code>&lt;Link&gt;</code> de Next.js, no <code>&lt;a&gt;</code> tradicional</td>
+            </tr>
         </table>
         
         <div class="timestamp">
-            <strong>Última actualización:</strong> 5 de febrero de 2026
+            <strong>Última actualización:</strong> 12 de febrero de 2026
         </div>
     </hr>
 </body>
